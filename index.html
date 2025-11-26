@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sprite Sheet Animation</title>
+    <title>Stryker Sprite Animator</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             min-height: 100vh;
             padding: 20px;
@@ -21,7 +21,7 @@
             align-items: center;
             color: #fff;
         }
-        
+
         .container {
             text-align: center;
             background: rgba(255, 255, 255, 0.1);
@@ -32,33 +32,36 @@
             border: 1px solid rgba(255,255,255,0.2);
             max-width: 800px;
         }
-        
+
         h1 {
             margin-bottom: 30px;
-            font-size: 2.5em;
+            font-size: 2em;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             letter-spacing: 2px;
         }
-        
+
         .sprite-container {
             position: relative;
             width: 512px;
             height: 458px;
             margin: 0 auto 30px;
-            background: linear-gradient(45deg, #2a2a2a 25%, #3a3a3a 25%, #3a3a3a 50%, #2a2a2a 50%, #2a2a2a 75%, #3a3a3a 75%, #3a3a3a);
+            background: linear-gradient(45deg, #2a2a2a 25%, #3a3a3a 25%, #3a3a3a 50%, #2a2a2a 50%, #2a2a2a 75%, #3a3a3a 75%, #3a3a3a 100%);
             background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-            border: 3px solid rgba(255,255,255,0.3);
+            border: 3px solid rgba(255,255,255,0.2);
         }
-        
-        #spriteCanvas {
+
+        canvas {
             display: block;
+            width: 100%;
+            height: 100%;
             image-rendering: pixelated;
             image-rendering: crisp-edges;
         }
-        
+
         .controls {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -68,11 +71,11 @@
             margin-left: auto;
             margin-right: auto;
         }
-        
+
         button {
             background: rgba(255, 255, 255, 0.2);
             color: white;
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 2px solid rgba(255,255,255,0.4);
             padding: 15px 20px;
             border-radius: 12px;
             cursor: pointer;
@@ -82,43 +85,42 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
+
         button:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0,0,0,0.3);
         }
-        
+
         button.active {
             background: rgba(76, 175, 80, 0.8);
             border-color: #4CAF50;
             box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
         }
-        
+
         .speed-control {
             margin: 30px 0;
             padding: 20px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 12px;
         }
-        
+
         .speed-control label {
             display: block;
             margin-bottom: 10px;
             font-weight: 600;
-            font-size: 1.1em;
         }
-        
+
         input[type="range"] {
             width: 100%;
             max-width: 400px;
             height: 8px;
             border-radius: 5px;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             outline: none;
             -webkit-appearance: none;
         }
-        
+
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -129,7 +131,7 @@
             cursor: pointer;
             box-shadow: 0 2px 10px rgba(76, 175, 80, 0.5);
         }
-        
+
         input[type="range"]::-moz-range-thumb {
             width: 20px;
             height: 20px;
@@ -137,74 +139,79 @@
             background: #4CAF50;
             cursor: pointer;
             border: none;
+            box-shadow: 0 2px 10px rgba(76, 175, 80, 0.5);
         }
-        
+
         .speed-value {
             display: inline-block;
             margin-top: 10px;
             padding: 5px 15px;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 8px;
             font-weight: 600;
         }
-        
+
         .info {
             margin-top: 30px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            font-size: 0.95em;
-            line-height: 1.6;
+            font-size: 0.9em;
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>⚔️ Stryker Animator ⚔️</h1>
-        
+
         <div class="sprite-container">
             <canvas id="spriteCanvas" width="512" height="458"></canvas>
         </div>
-        
+
         <div class="controls">
-            <button onclick="setAnimation('idle')" class="active">Idle</button>
+            <button onclick="setAnimation('idle')">Idle</button>
             <button onclick="setAnimation('attackWindup')">Attack Windup</button>
             <button onclick="setAnimation('attackStrike')">Attack Strike</button>
             <button onclick="setAnimation('attackImpact')">Attack Impact</button>
             <button onclick="setAnimation('damage')">Taking Damage</button>
             <button onclick="setAnimation('death')">Death/Defeat</button>
         </div>
-        
+
         <div class="speed-control">
             <label for="speed">Animation Speed</label>
-            <input type="range" id="speed" min="50" max="500" value="120" step="10">
-            <div class="speed-value" id="speedValue">120ms per frame</div>
+            <input type="range" id="speed" min="50" max="500" value="120">
+            <div class="speed-value" id="speedValue">120ms</div>
         </div>
-        
+
         <div class="info">
-            <strong>Instructions:</strong> Click the buttons above to switch between different animations. 
+            <strong>Instructions:</strong> Click the buttons above to switch between different animations.<br>
             Adjust the slider to control animation speed.
         </div>
     </div>
-    
+
     <script>
         const spriteSheet = new Image();
-        spriteSheet.crossOrigin = "anonymous";
+        spriteSheet.crossOrigin = 'anonymous';
         spriteSheet.src = 'stryker_v1.png';
-        
+
         const canvas = document.getElementById('spriteCanvas');
         const ctx = canvas.getContext('2d', { alpha: true });
-        
+
         // Disable image smoothing for crisp pixel art
         ctx.imageSmoothingEnabled = false;
-        ctx.webkitImageSmoothingEnabled = false;
         ctx.mozImageSmoothingEnabled = false;
+        ctx.webkitImageSmoothingEnabled = false;
         ctx.msImageSmoothingEnabled = false;
+
+        // Sprite sheet layout: 3 columns (angles) x 6 rows (animations)
+        // Total size: 1536 x 2752
+        // Each frame: 512 x 458 (approximately, accounting for labels)
         
-        // Correct sprite dimensions for your 1536x2752 sprite sheet
-        const SPRITE_WIDTH = 512;  // 1536 / 3 columns
-        const SPRITE_HEIGHT = 458; // 2752 / 6 rows (rounded)
+        // Actual sprite dimensions (excluding label areas)
+        const SPRITE_WIDTH = 512;
+        const SPRITE_HEIGHT = 458;
+        const COLS = 3;
         
+        // Define animations with row index and frame count
+        // Each animation cycles through 3 viewing angles (columns)
         const animations = {
             idle: { row: 0, frames: 3, name: 'Idle' },
             attackWindup: { row: 1, frames: 3, name: 'Attack Windup' },
@@ -213,78 +220,141 @@
             damage: { row: 4, frames: 3, name: 'Taking Damage' },
             death: { row: 5, frames: 3, name: 'Death/Defeat' }
         };
-        
+
         let currentAnimation = 'idle';
         let currentFrame = 0;
-        let animationSpeed = 120;
+        let animationSpeed = 120; // milliseconds per frame
         let lastFrameTime = 0;
         let isAnimating = false;
-        
+        let spriteBitmaps = [];
+
+        // Pre-create ImageBitmaps for better performance
+        async function initSprites() {
+            const bitmaps = [];
+            
+            // Create a bitmap for each sprite in the sheet
+            for (let row = 0; row < 6; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    const srcX = col * SPRITE_WIDTH;
+                    const srcY = row * SPRITE_HEIGHT;
+                    
+                    try {
+                        const bitmap = await createImageBitmap(
+                            spriteSheet,
+                            srcX, srcY,
+                            SPRITE_WIDTH, SPRITE_HEIGHT
+                        );
+                        bitmaps.push(bitmap);
+                    } catch (e) {
+                        // Fallback for browsers without createImageBitmap
+                        bitmaps.push({ row, col });
+                    }
+                }
+            }
+            
+            return bitmaps;
+        }
+
         function setAnimation(animName) {
-            currentAnimation = animName;
-            currentFrame = 0;
-            
-            // Update button states
-            document.querySelectorAll('button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
+            if (animations[animName]) {
+                currentAnimation = animName;
+                currentFrame = 0;
+                
+                // Update button states
+                document.querySelectorAll('button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                event.target.classList.add('active');
+            }
         }
-        
-        function updateSpeed() {
-            const speedInput = document.getElementById('speed');
-            animationSpeed = parseInt(speedInput.value);
-            document.getElementById('speedValue').textContent = animationSpeed + 'ms per frame';
-        }
-        
-        document.getElementById('speed').addEventListener('input', updateSpeed);
-        
+
         function drawSprite(timestamp) {
-            if (!isAnimating) return;
-            
-            const anim = animations[currentAnimation];
-            
-            // Time-based frame advancement for smooth animation
-            if (timestamp - lastFrameTime >= animationSpeed) {
-                currentFrame = (currentFrame + 1) % anim.frames;
+            // Calculate if enough time has passed to advance frame
+            if (!lastFrameTime) lastFrameTime = timestamp;
+            const elapsed = timestamp - lastFrameTime;
+
+            if (elapsed > animationSpeed) {
                 lastFrameTime = timestamp;
+                
+                const anim = animations[currentAnimation];
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Calculate source coordinates on sprite sheet
+                const srcX = currentFrame * SPRITE_WIDTH;
+                const srcY = anim.row * SPRITE_HEIGHT;
+
+                // Draw the current frame
+                try {
+                    const bitmapIndex = anim.row * COLS + currentFrame;
+                    if (spriteBitmaps[bitmapIndex] && spriteBitmaps[bitmapIndex].width) {
+                        // Use pre-created ImageBitmap for better performance
+                        ctx.drawImage(
+                            spriteBitmaps[bitmapIndex],
+                            0, 0,
+                            SPRITE_WIDTH, SPRITE_HEIGHT
+                        );
+                    } else {
+                        // Fallback to direct drawing
+                        ctx.drawImage(
+                            spriteSheet,
+                            srcX, srcY, SPRITE_WIDTH, SPRITE_HEIGHT,
+                            0, 0, SPRITE_WIDTH, SPRITE_HEIGHT
+                        );
+                    }
+                } catch (e) {
+                    console.error('Error drawing sprite:', e);
+                }
+
+                // Advance to next frame
+                currentFrame = (currentFrame + 1) % anim.frames;
             }
-            
-            // Clear canvas with transparency
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Calculate source position in sprite sheet
-            const srcX = currentFrame * SPRITE_WIDTH;
-            const srcY = anim.row * SPRITE_HEIGHT;
-            
-            // Draw the current frame (1:1 scale, no scaling)
-            try {
-                ctx.drawImage(
-                    spriteSheet,
-                    srcX, srcY, SPRITE_WIDTH, SPRITE_HEIGHT,
-                    0, 0, SPRITE_WIDTH, SPRITE_HEIGHT
-                );
-            } catch (e) {
-                console.error('Error drawing sprite:', e);
+
+            // Continue animation loop
+            if (isAnimating) {
+                requestAnimationFrame(drawSprite);
             }
-            
-            requestAnimationFrame(drawSprite);
         }
-        
-        spriteSheet.onload = () => {
+
+        // Initialize when sprite sheet loads
+        spriteSheet.onload = async () => {
             console.log('Sprite sheet loaded successfully');
             console.log('Image dimensions:', spriteSheet.width, 'x', spriteSheet.height);
+            
+            // Try to create ImageBitmaps for performance
+            try {
+                spriteBitmaps = await initSprites();
+                console.log('ImageBitmaps created:', spriteBitmaps.length);
+            } catch (e) {
+                console.log('ImageBitmap not supported, using fallback');
+            }
+            
             isAnimating = true;
+            
+            // Set initial button state
+            document.querySelector('button').classList.add('active');
+            
+            // Start animation
             requestAnimationFrame(drawSprite);
         };
-        
+
         spriteSheet.onerror = () => {
             ctx.fillStyle = '#ff6b6b';
             ctx.font = 'bold 24px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('Error loading sprite sheet', canvas.width/2, canvas.height/2);
-            console.error('Failed to load sprite sheet: stryker_v1.png');
+            ctx.fillText('Error loading sprite sheet', canvas.width / 2, canvas.height / 2);
+            console.error('Failed to load sprite sheet');
         };
+
+        // Speed control
+        const speedInput = document.getElementById('speed');
+        const speedValue = document.getElementById('speedValue');
+
+        speedInput.addEventListener('input', (e) => {
+            animationSpeed = parseInt(e.target.value);
+            speedValue.textContent = animationSpeed + 'ms';
+        });
     </script>
 </body>
 </html>
