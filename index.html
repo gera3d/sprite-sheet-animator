@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprite Sheet Animation</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #2c3e50;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #ecf0f1;
+        }
+        
+        .container {
+            text-align: center;
+            background: #34495e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            margin-top: 0;
+            color: #3498db;
+        }
+        
+        .sprite-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            background: #1a252f;
+            border: 3px solid #3498db;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .sprite {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            transform-origin: center;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        button.active {
+            background: #e74c3c;
+        }
+        
+        .speed-control {
+            margin: 20px 0;
+        }
+        
+        .speed-control label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        input[type="range"] {
+            width: 200px;
+            vertical-align: middle;
+        }
+        
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #2c3e50;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚔️ Sprite Sheet Animator ⚔️</h1>
+        
+        <div class="sprite-container">
+            <canvas id="spriteCanvas" width="300" height="300"></canvas>
+        </div>
+        
+        <div class="controls">
+            <button onclick="setAnimation('idle')">Idle</button>
+            <button onclick="setAnimation('attackWindup')">Attack Windup</button>
+            <button onclick="setAnimation('attackStrike')">Attack Strike</button>
+            <button onclick="setAnimation('attackImpact')">Attack Impact</button>
+            <button onclick="setAnimation('damage')">Taking Damage</button>
+            <button onclick="setAnimation('death')">Death/Defeat</button>
+        </div>
+        
+        <div class="speed-control">
+            <label for="speed">Animation Speed:</label>
+            <input type="range" id="speed" min="50" max="500" value="150" onchange="updateSpeed(this.value)">
+            <span id="speedValue">150ms</span>
+        </div>
+        
+        <div class="info">
+            <p><strong>Instructions:</strong> Click the buttons above to switch between different animations.</p>
+        </div>
+    </div>
+    
+    <script>
+        const spriteSheet = new Image();
+        spriteSheet.src = 'stryker_v1.png';
+        
+        const canvas = document.getElementById('spriteCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const SPRITE_WIDTH = 256;
+        const SPRITE_HEIGHT = 256;
+        const SCALE = 1.5;
+        
+        const animations = {
+            idle: { row: 0, frames: 3, name: 'Idle' },
+            attackWindup: { row: 1, frames: 3, name: 'Attack Windup' },
+            attackStrike: { row: 2, frames: 3, name: 'Attack Strike' },
+            attackImpact: { row: 3, frames: 3, name: 'Attack Impact' },
+            damage: { row: 4, frames: 3, name: 'Taking Damage' },
+            death: { row: 5, frames: 3, name: 'Death/Defeat' }
+        };
+        
+        let currentAnimation = 'idle';
+        let currentFrame = 0;
+        let animationSpeed = 150;
+        let lastFrameTime = Date.now();
+        
+        function setAnimation(animName) {
+            currentAnimation = animName;
+            currentFrame = 0;
+            document.querySelectorAll('button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        function updateSpeed(value) {
+            animationSpeed = parseInt(value);
+            document.getElementById('speedValue').textContent = value + 'ms';
+        }
+        
+        function drawSprite() {
+            const anim = animations[currentAnimation];
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const now = Date.now();
+            if (now - lastFrameTime > animationSpeed) {
+                currentFrame = (currentFrame + 1) % anim.frames;
+                lastFrameTime = now;
+            }
+            
+            const srcX = currentFrame * SPRITE_WIDTH;
+            const srcY = anim.row * SPRITE_HEIGHT;
+            const destWidth = SPRITE_WIDTH * SCALE;
+            const destHeight = SPRITE_HEIGHT * SCALE;
+            const destX = (canvas.width - destWidth) / 2;
+            const destY = (canvas.height - destHeight) / 2;
+            
+            ctx.drawImage(
+                spriteSheet,
+                srcX, srcY, SPRITE_WIDTH, SPRITE_HEIGHT,
+                destX, destY, destWidth, destHeight
+            );
+            
+            requestAnimationFrame(drawSprite);
+        }
+        
+        spriteSheet.onload = () => {
+            drawSprite();
+        };
+        
+        spriteSheet.onerror = () => {
+            ctx.fillStyle = '#ecf0f1';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Loading sprite sheet...', canvas.width/2, canvas.height/2);
+        };
+    </script>
+</body>
+</html>
