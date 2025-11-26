@@ -209,6 +209,8 @@
         const SPRITE_WIDTH = 512;
         const SPRITE_HEIGHT = 458;
         const COLS = 3;
+                const LABEL_LEFT = 28;  // Left margin for row labels
+        const LABEL_TOP = 48;   // Top margin for column labels
         
         // Define animations with row index and frame count
         // Each animation cycles through 3 viewing angles (columns)
@@ -235,10 +237,8 @@
             // Create a bitmap for each sprite in the sheet
             for (let row = 0; row < 6; row++) {
                 for (let col = 0; col < COLS; col++) {
-                    const srcX = col * SPRITE_WIDTH;
-                    const srcY = row * SPRITE_HEIGHT;
-                    
-                    try {
+                    const srcX = LABEL_LEFT + col * SPRITE_WIDTH;                    const srcY = row * SPRITE_HEIGHT;
+                    const srcY = LABEL_TOP + row * SPRITE_HEIGHT;                    try {
                         const bitmap = await createImageBitmap(
                             spriteSheet,
                             srcX, srcY,
@@ -282,10 +282,8 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 // Calculate source coordinates on sprite sheet
-                const srcX = currentFrame * SPRITE_WIDTH;
-                const srcY = anim.row * SPRITE_HEIGHT;
-
-                // Draw the current frame
+                const srcX = LABEL_LEFT + currentFrame * SPRITE_WIDTH;                const srcY = anim.row * SPRITE_HEIGHT;
+                const srcY = LABEL_TOP + anim.row * SPRITE_HEIGHT;                // Draw the current frame
                 try {
                     const bitmapIndex = anim.row * COLS + currentFrame;
                     if (spriteBitmaps[bitmapIndex] && spriteBitmaps[bitmapIndex].width) {
